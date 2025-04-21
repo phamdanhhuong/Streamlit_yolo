@@ -211,8 +211,8 @@ class Inference:
         if self.st.sidebar.button("Start"):
             stop_button = self.st.button("Stop")  # Button to stop the inference
 
-            # Display message for Streamlit Cloud (Webcam not available)
-            if self.st.runtime.exists() and self.st.runtime.is_cloud:
+            # Check if the app is deployed on Streamlit Cloud using an environment variable
+            if os.getenv('STREAMLIT_SERVER'):
                 self.st.warning("Webcam access is not available in Streamlit Cloud. Please use a video file instead.")
                 return
 
