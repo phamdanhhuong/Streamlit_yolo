@@ -211,8 +211,8 @@ class Inference:
         if self.st.sidebar.button("Start"):
             stop_button = self.st.button("Stop")  # Button to stop the inference
 
-            # Check if the app is deployed on Streamlit Cloud using an environment variable
-            if os.getenv('STREAMLIT_SERVER'):
+            # Check if the app is deployed on Streamlit Cloud using the STREAMLIT_VERSION environment variable
+            if os.getenv('STREAMLIT_VERSION'):
                 self.st.warning("Webcam access is not available in Streamlit Cloud. Please use a video file instead.")
                 return
 
@@ -245,7 +245,7 @@ class Inference:
                 self.ann_frame.image(annotated_frame, channels="BGR")  # Display processed frame
 
             cap.release()  # Release the capture
-        cv2.destroyAllWindows()  # Destroy all OpenCV windows
+        cv2.destroyAllWindows()
 
 
 
