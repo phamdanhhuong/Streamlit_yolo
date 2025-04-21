@@ -112,6 +112,18 @@ class Inference:
         self.org_frame = col1.empty()  # Container for original frame
         self.ann_frame = col2.empty()  # Container for annotated frame
 
+    # def source_upload(self):
+    #     """Handle video file uploads through the Streamlit interface."""
+    #     self.vid_file_name = ""
+    #     if self.source == "video":
+    #         vid_file = self.st.sidebar.file_uploader("Upload Video File", type=["mp4", "mov", "avi", "mkv"])
+    #         if vid_file is not None:
+    #             g = io.BytesIO(vid_file.read())  # BytesIO Object
+    #             with open("ultralytics.mp4", "wb") as out:  # Open temporary file as bytes
+    #                 out.write(g.read())  # Read bytes into file
+    #             self.vid_file_name = "ultralytics.mp4"
+    #     elif self.source == "webcam":
+    #         self.vid_file_name = 0  # Use webcam index 0
     def source_upload(self):
         """Handle video file uploads through the Streamlit interface."""
         self.vid_file_name = ""
@@ -123,7 +135,12 @@ class Inference:
                     out.write(g.read())  # Read bytes into file
                 self.vid_file_name = "ultralytics.mp4"
         elif self.source == "webcam":
-            self.vid_file_name = 0  # Use webcam index 0
+            # For local testing, use Streamlit's camera_input method
+            if self.st.runtime.exists():
+                webcam_input = self.st.camera_input("Capture Image")  # Local webcam access
+                if webcam_input is not None:
+                    self.vid_file_name = webcam_input
+
 
     def configure(self):
         """Configure the model and load selected classes for inference."""
@@ -145,6 +162,45 @@ class Inference:
         if not isinstance(self.selected_ind, list):  # Ensure selected_options is a list
             self.selected_ind = list(self.selected_ind)
 
+    # def inference(self):
+    #     """Perform real-time object detection inference on video or webcam feed."""
+    #     self.web_ui()  # Initialize the web interface
+    #     self.sidebar()  # Create the sidebar
+    #     self.source_upload()  # Upload the video source
+    #     self.configure()  # Configure the app
+
+    #     if self.st.sidebar.button("Start"):
+    #         stop_button = self.st.button("Stop")  # Button to stop the inference
+    #         cap = cv2.VideoCapture(self.vid_file_name)  # Capture the video
+    #         if not cap.isOpened():
+    #             self.st.error("Could not open webcam or video source.")
+    #             return
+
+    #         while cap.isOpened():
+    #             success, frame = cap.read()
+    #             if not success:
+    #                 self.st.warning("Failed to read frame from webcam. Please verify the webcam is connected properly.")
+    #                 break
+
+    #             # Process frame with model
+    #             if self.enable_trk == "Yes":
+    #                 results = self.model.track(
+    #                     frame, conf=self.conf, iou=self.iou, classes=self.selected_ind, persist=True
+    #                 )
+    #             else:
+    #                 results = self.model(frame, conf=self.conf, iou=self.iou, classes=self.selected_ind)
+
+    #             annotated_frame = results[0].plot()  # Add annotations on frame
+
+    #             if stop_button:
+    #                 cap.release()  # Release the capture
+    #                 self.st.stop()  # Stop streamlit app
+
+    #             self.org_frame.image(frame, channels="BGR")  # Display original frame
+    #             self.ann_frame.image(annotated_frame, channels="BGR")  # Display processed frame
+
+    #         cap.release()  # Release the capture
+    #     cv2.destroyAllWindows()  # Destroy all OpenCV windows
     def inference(self):
         """Perform real-time object detection inference on video or webcam feed."""
         self.web_ui()  # Initialize the web interface
@@ -154,6 +210,12 @@ class Inference:
 
         if self.st.sidebar.button("Start"):
             stop_button = self.st.button("Stop")  # Button to stop the inference
+
+            # Display message for Streamlit Cloud (Webcam not available)
+            if self.st.runtime.exists() and self.st.runtime.is_cloud:
+                self.st.warning("Webcam access is not available in Streamlit Cloud. Please use a video file instead.")
+                return
+
             cap = cv2.VideoCapture(self.vid_file_name)  # Capture the video
             if not cap.isOpened():
                 self.st.error("Could not open webcam or video source.")
@@ -184,6 +246,7 @@ class Inference:
 
             cap.release()  # Release the capture
         cv2.destroyAllWindows()  # Destroy all OpenCV windows
+
 
 
 if __name__ == "__main__":
