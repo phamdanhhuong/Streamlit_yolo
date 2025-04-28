@@ -123,7 +123,7 @@ class Inference:
                     out.write(g.read())  # Read bytes into file
                 self.vid_file_name = "ultralytics.mp4"
         elif self.source == "webcam":
-            self.vid_file_name = 0  # Use webcam index 0
+            self.vid_file_name = "https://eb2f-14-187-80-86.ngrok-free.app/video"  # Use webcam index 0
 
 
 
